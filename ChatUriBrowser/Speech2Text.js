@@ -36,9 +36,6 @@ stop.onclick = event => {
   recorder.stop();
 };
 
-
-
-
 function sendToSpeech() {
   console.log('Send to speech.');
   let blob = new Blob(chunks, {type: 'audio/ogg' });

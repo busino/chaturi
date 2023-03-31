@@ -10,10 +10,9 @@ btn.onclick = e => {
   console.log('click');
 
 
-  var text = input.value;
-  text = input.value;
+  const text = input.value;
   console.log('Ask for text', text);
-  var url = 'https://api.openai.com/v1/chat/completions';
+  const url = 'https://api.openai.com/v1/chat/completions';
   const req = 
   {
     "model": "gpt-3.5-turbo",

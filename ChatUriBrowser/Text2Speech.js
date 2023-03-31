@@ -9,7 +9,6 @@ let input = document.getElementById('input');
 let audio = document.getElementById('audio');
 
 btn.onclick = e => {
-  var text = 'Wie alt bist du?';
   text = input.value;
   console.log('Ask for text', text);
   var url = 'https://switzerlandnorth.tts.speech.microsoft.com/cognitiveservices/v1';
