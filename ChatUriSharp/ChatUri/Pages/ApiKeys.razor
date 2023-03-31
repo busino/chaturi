@@ -1,0 +1,28 @@
+﻿@page "/apiconfig"
+@using OpenAI_API
+@using OpenAI_API.Chat
+@using System.Text
+@using Microsoft.CognitiveServices.Speech
+@using System.Media
+@using NAudio.Wave
+
+
+<PageTitle>API Keys</PageTitle>
+
+
+	<div class="input-group">
+		<label class="form-label">OpenAI Key</label>
+		<input type="text" class="form-control" @bind="QuickAndDirtyApiKeys.OpenAiKey"/>
+	</div>
+
+	<div class="input-group">
+		<label class="form-label">Azure Speech Key</label>
+		<input type="text" class="form-control" @bind="QuickAndDirtyApiKeys.AzureApiKey"/>
+	</div>
+
+
+@code
+{
+
+
+}
