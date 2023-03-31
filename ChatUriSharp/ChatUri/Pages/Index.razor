@@ -5,33 +5,48 @@
 @using Microsoft.CognitiveServices.Speech
 @using NAudio.Wave
 
-
-<PageTitle>Index</PageTitle>
+<PageTitle>ChatUri</PageTitle>
 
 @if (QuickAndDirtyApiKeys.KeysAreSet)
 {
+	<div class="input-group">
+		@if (!IsRecording)
+		{
+			<button type="button" class="btn btn-primary" @onclick="StartRecord"> <span class="oi oi-media-record" aria-hidden="true" style="color: red;"></span></button>
+		} else {
+			<button type="button" class="btn btn-outline-primary" @onclick="StopRecord"><span class="oi oi-media-stop" aria-hidden="true" style="color: red;"></span></button>
+		}
 
-	<button type="button" class="btn btn-primary" @onclick="RecordQuestion">Record</button>
-	@if (IsRecording)
-	{
-		<div>Recording...</div>
-	}
-
-		<div class="input-group">
-			<input type="text" class="form-control" @bind="QuestionForChatGPT"/>
-		</div>
-
-
-		<button type="button" class="btn btn-primary" @onclick="AskChatGPT">Frag sände</button>
+		<input type="text" class="form-control" @bind="QuestionForChatGPT"/>
+	</div>
 
 	@if (GptIsThinking)
 	{
 		<div>ChatGPT dänkt nache....</div>
 	}
 
-		<div>
-			<textarea @bind="Answers" cols="200" rows="400"></textarea>
+	@foreach (var message in Dialog)
+	{
+		<div class="row">
+			
+			<div class="col-6">
+				@if (message is QuestionMessage qm)
+				{
+					<div class="question m-4 p-4">
+						@qm.Text
+					</div>
+				}
+			</div>
+			<div class="col-6">
+				@if (message is AnswerMessage am)
+				{
+					<div class="answer m-4 p-4">
+						@am.Text
+					</div>
+				}
+			</div>
 		</div>
+	}
 }
 else
 {
@@ -43,12 +58,13 @@ else
 	private OpenAIAPI? api = null; 
 	private Conversation? chat = null;
     private SpeechConfig? config = null;
+	private SpeechRecognizer? recognizer = null;
 
 	public bool IsRecording { get; set; } = false;
 	public string QuestionForChatGPT { get; set; } = "Drück doch eifach uf Record";
-	public string Answers { get; set; } = string.Empty;
 	public bool GptIsThinking { get; set; } = false;
 
+	public List<IMessage> Dialog = new();
 
 	protected override void OnInitialized()
 	{
@@ -65,70 +81,46 @@ else
 		base.OnInitialized();
 	}
 
+	private async Task StartRecord()
+	{
+		recognizer = new SpeechRecognizer(config, "de-CH");
+		QuestionForChatGPT = string.Empty;
+		recognizer.Recognized += RecognizerOnRecognized;
+		await recognizer.StartContinuousRecognitionAsync();
+		IsRecording = true;
+	}
+
+	private async Task StopRecord()
+	{
+		await recognizer.StopContinuousRecognitionAsync();
+
+		IsRecording = false;
+		await InvokeAsync(StateHasChanged);
+
+		await AskChatGPT();
+	}
+
+	private void RecognizerOnRecognized(object? sender, SpeechRecognitionEventArgs e)
+	{
+		QuestionForChatGPT += $" {e.Result.Text}";
+		InvokeAsync(StateHasChanged);
+	}
 
 	private async Task AskChatGPT()
 	{
 		GptIsThinking = true;
-		Answers += $"\nFrag: {QuestionForChatGPT}"; 
+		InvokeAsync(StateHasChanged);
+
+		Dialog.Add(new QuestionMessage(QuestionForChatGPT));
 		chat.AppendUserInput(QuestionForChatGPT);
 		var response =  await chat.GetResponseFromChatbot();
 
-		Answers += $"\nAntwort: {response}";
+		Dialog.Add(new AnswerMessage(response));
 		GptIsThinking = false;
 
 		InvokeAsync(StateHasChanged);
 
 		await TextToSpeech(response);
-
-	}
-
-
-
-	private async Task RecordQuestion()
-	{
-		IsRecording = true;
-		InvokeAsync(StateHasChanged);
-
-	
-
-	// Creates a speech recognizer using microphone as audio input.
-        using (var recognizer = new SpeechRecognizer(config, "de-CH"))
-        {
-
-            var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-
-            // Checks result.
-
-            if (result.Reason == ResultReason.RecognizedSpeech)
-            {
-	            IsRecording = false;
-	            QuestionForChatGPT = result.Text;
-
-	            await AskChatGPT();
-
-            }
-            else if (result.Reason == ResultReason.NoMatch)
-            {
-	            QuestionForChatGPT = "hani nid verstandä";
-            }
-            else if (result.Reason == ResultReason.Canceled)
-            {
-	            StringBuilder sb = new StringBuilder();
-                var cancellation = CancellationDetails.FromResult(result);
-                sb.AppendLine($"CANCELED: Reason={cancellation.Reason}");
-                if (cancellation.Reason == CancellationReason.Error)
-                {
-                    sb.AppendLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
-                    sb.AppendLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
-                    sb.AppendLine($"CANCELED: Did you update the subscription info?");
-                }
-
-	            QuestionForChatGPT = sb.ToString();
-            }
-
-        }
-		
-		IsRecording = false;
 	}
 
     private async Task TextToSpeech(string lastText)
@@ -136,54 +128,50 @@ else
         
         try
         {
-            // Creates a speech synthesizer.
-            using (var synthesizer = new SpeechSynthesizer(config, null))
-            {
-                // Receive a text from TextForSynthesis text box and synthesize it to speaker.
-                using (var result = await synthesizer.SpeakTextAsync(lastText).ConfigureAwait(false))
-                {
-                    // Checks result.
-                    if (result.Reason == ResultReason.SynthesizingAudioCompleted)
-                    {
-                        // Since native playback is not yet supported on UWP (currently only supported on Windows/Linux Desktop),
-                        // use the WinRT API to play audio here as a short term solution.
-                        using (var audioStream = AudioDataStream.FromResult(result))
-                        {
-
-	
-                            // Save synthesized audio data as a wave file and use MediaPlayer to play it
-                            var filePath = "outputaudio.wav";
+			// Creates a speech synthesizer.
+	        using var synthesizer = new SpeechSynthesizer(config, null);
+			// Receive a text from TextForSynthesis text box and synthesize it to speaker.
+	        using var result = await synthesizer.SpeakTextAsync(lastText).ConfigureAwait(false);
+			// Checks result.
+	        if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+	        {
+		        using var audioStream = AudioDataStream.FromResult(result);
+				// Save synthesized audio data as a wave file and use MediaPlayer to play it
+		        var filePath = "outputaudio.wav";
                             
-                            await audioStream.SaveToWaveFileAsync(filePath);
-                            using (var audioFile = new AudioFileReader(filePath))
-	                        using(var outputDevice = new WaveOutEvent())
-	                        {
-		                        outputDevice.Init(audioFile);
-		                        outputDevice.Play();
-		                        while (outputDevice.PlaybackState == PlaybackState.Playing)
-		                        {
-			                        Thread.Sleep(1000);
-		                        }
-	                        }
-                        }
-                    }
-                    else if (result.Reason == ResultReason.Canceled)
-                    {
-                        var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+		        await audioStream.SaveToWaveFileAsync(filePath);
+		        await using var audioFile = new AudioFileReader(filePath);
+		        using var outputDevice = new WaveOutEvent();
+		        outputDevice.Init(audioFile);
+		        outputDevice.Play();
+		        while (outputDevice.PlaybackState == PlaybackState.Playing)
+		        {
+			        Thread.Sleep(100);
+		        }
+	        }
+	        else if (result.Reason == ResultReason.Canceled)
+	        {
+		        var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
 
-                        StringBuilder sb = new StringBuilder();
-                        sb.AppendLine($"CANCELED: Reason={cancellation.Reason}");
-                        sb.AppendLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
-                        sb.AppendLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
-                    }
-                }
-            }
+		        StringBuilder sb = new StringBuilder();
+		        sb.AppendLine($"CANCELED: Reason={cancellation.Reason}");
+		        sb.AppendLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+		        sb.AppendLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+	        }
         }
         catch (Exception ex)
         {
  
         }
-
     }
 
+
+	public interface IMessage
+	{
+		string Text { get; }
+	}
+
+	record QuestionMessage(string Text) : IMessage;
+
+	record AnswerMessage(string Text) : IMessage;
 }
