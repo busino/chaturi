@@ -12,7 +12,7 @@
 	<div class="input-group">
 		@if (!IsRecording)
 		{
-			<button type="button" class="btn btn-primary" @onclick="StartRecord"> <span class="oi oi-media-record" aria-hidden="true" style="color: red;"></span></button>
+			<button type="button" class="btn btn-primary" @onclick="StartRecord"> <span class="oi oi-microphone" aria-hidden="true" style="color: red;"></span></button>
 		} else {
 			<button type="button" class="btn btn-outline-primary" @onclick="StopRecord"><span class="oi oi-media-stop" aria-hidden="true" style="color: red;"></span></button>
 		}
@@ -61,7 +61,7 @@ else
 	private SpeechRecognizer? recognizer = null;
 
 	public bool IsRecording { get; set; } = false;
-	public string QuestionForChatGPT { get; set; } = "Drück doch eifach uf Record";
+	public string QuestionForChatGPT { get; set; } = "Drick doch eifach üfs Mikrofon";
 	public bool GptIsThinking { get; set; } = false;
 
 	public List<IMessage> Dialog = new();
@@ -73,7 +73,8 @@ else
 			api = new OpenAIAPI(QuickAndDirtyApiKeys.OpenAiKey);
 			chat = api.Chat.CreateConversation();
 	        chat.AppendSystemMessage("Du bist eine Marketing-Assistentin names Leni. Du wohnst in Schattdorf und magst Tiere, Reisen und lange Spatziergänge. Dein liebster Schnupfspruch ist: als er gerade gerade war, knickte er ein, was schade war.");
-			config = SpeechConfig.FromSubscription("5553e80a837b4f0584f93878fdcc23d6", "switzerlandnorth");
+			
+			config = SpeechConfig.FromSubscription(QuickAndDirtyApiKeys.AzureApiKey, "switzerlandnorth");
 			config.SpeechSynthesisLanguage = "de-CH";
 	        config.SpeechSynthesisVoiceName = "de-CH-LeniNeural";
 		}
