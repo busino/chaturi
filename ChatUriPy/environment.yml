@@ -1,0 +1,6 @@
+name: chaturipy
+channels:
+  - defaults
+dependencies:
+  - requests
+  - flask
