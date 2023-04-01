@@ -5,15 +5,15 @@
 
 ## Info
 
-SwissGPT ist ein Projekt der Data Hackdays Uri 2023. Ziel ist es ChatGPT Schweizerdeutsch beizubringen. Es wurden vier Versionen erstellt. Eine Blazor Applikation, eine Browser Applikation, eine Python Applikation und eine Flask Applikation. Das Projekt läuft mithilfe des Microsoft Azure Speech Service und des OpenAI ChatGPT Service.
+SwissGPT ist ein Projekt der Data Hackdays Uri 2023. Ziel ist es ChatGPT Schweizerdeutsch beizubringen. Es wurden vier Versionen erstellt. Eine C# Applikation, eine Browser Applikation, eine Python Applikation und eine Flask Applikation. Das Projekt läuft mithilfe des Microsoft Azure Speech Service und des OpenAI ChatGPT Service.
 
 
 ## Getting Started
 
- * [Razor Applikation](./swissGptSharp)
- * [Browser Applikation](./swissGptBrowser)
- * [Python Applikation](./swissGptPy)
- * [Flask Applikation](./swissGptFlask)
+ * [C# Applikation](./swissGptSharp)
+ * [Browser Applikation (HTML/js)](./swissGptBrowser)
+ * [Python Applikation (command client)](./swissGptPy)
+ * [Flask Applikation (Web)](./swissGptFlask)
 
 
 ## Documentation Resources
