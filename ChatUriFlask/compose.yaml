@@ -1,0 +1,13 @@
+services:
+  web:
+    environment:
+      GPT_KEY: ${GPT_KEY}
+      SPEECH_KEY: ${SPEECH_KEY}
+    build:
+      context: app
+      target: builder
+    # flask requires SIGINT to stop gracefully
+    # (default stop signal from Compose is SIGTERM)
+    stop_signal: SIGINT
+    ports:
+      - '8000:8000'
