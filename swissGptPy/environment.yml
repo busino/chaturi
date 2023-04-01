@@ -1,4 +1,4 @@
-name: chaturipy
+name: swissgpt
 channels:
   - defaults
 dependencies:

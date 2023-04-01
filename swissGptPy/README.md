@@ -10,5 +10,5 @@ conda env create -f environment.yml
 ```
 Activate the virtual env
 ```
-activate chaturipy
+activate swissgpt
 ```
