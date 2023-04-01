@@ -10,10 +10,10 @@ SwissGPT ist ein Projekt der Data Hackdays Uri 2023. Ziel ist es ChatGPT Schweiz
 
 ## Getting Started
 
- * [Razor Applikation](./ChatUriSharp)
- * [Browser Applikation](./ChatUriBrowser)
- * [Python Applikation](./ChatUriPy)
- * [Flask Applikation](./ChatUriFlask)
+ * [Razor Applikation](./swissGptSharp)
+ * [Browser Applikation](./swissGptBrowser)
+ * [Python Applikation](./swissGptPy)
+ * [Flask Applikation](./swissGptFlask)
 
 
 ## Documentation Resources
