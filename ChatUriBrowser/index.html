@@ -7,20 +7,29 @@
   <body>
     <h1>SwissGPT</h1>
 
+    Nimm eine Frage auf und hör dir die Antwort an.
+
     <div id='btns'>
-        <button id='start'>Start</button>
-        <button id='stop'>Stop</button>
+        <button id='start'>Start Recording</button>
     </div>
 
-    Question:
-    <textarea id="question">
+    <p>
+    Question:<br>
+    <textarea id="question" rows="6" cols="80">
     </textarea>
-    Answer:
-    <textarea id="answer">
+    <button id="ask" title="Diese Frage beantworten.">Ask</button>
+    </p>
+    <p>
+    Answer:<br>
+    <textarea id="answer" rows="6" cols="80">
     </textarea>
+    <button id="tell" title="Diesen Text vorlesen.">Tell</button>
+    </p>
 
+    <p>
     <audio id="audio" controls src="">
     </audio>
+    </p>
 
     <script src="keys.js"></script>
     <script src="main.js"></script>
